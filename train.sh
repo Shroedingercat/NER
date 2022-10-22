@@ -1,0 +1,12 @@
+python train.py \
+    --output_dir=./NER \
+    --model_type=bert \
+    --model_name_or_path=microsoft/deberta-v3-base \
+    --train_data_file=./data/eng.testa \
+    --eval_data_file=./data/eng.train \
+    --epoch 5 \
+    --max_length 256 \
+    --batch_size 32 \
+    --learning_rate 2e-5 \
+    --seed 12456 \
+    --device cuda:0
