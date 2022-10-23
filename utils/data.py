@@ -47,22 +47,28 @@ def read_data(file: str) -> (Dict[str, list], Dict[str, int]):
 
 def align_label_example(tokenized_input: Dict[str, torch.Tensor],
                         labels: List[str],
-                        labels_to_ids: Dict[str, int]) -> List[int]:
+                        labels_to_ids: Dict[str, int]) -> (List[int], List[int]):
     word_ids = tokenized_input.word_ids()
 
     previous_word_idx = None
     label_ids = []
+    tokens = []
 
     for word_idx in word_ids:
         if word_idx is None:
             label_ids.append(-100)
+            tokens.append(0)
         elif word_idx != previous_word_idx:
             label_ids.append(labels_to_ids[labels[word_idx]])
+            tokens.append(1)
         else:
             label_ids.append(-100)
+            tokens.append(0)
         previous_word_idx = word_idx
 
-    return label_ids
+    assert len(word_ids) == len(tokens)
+
+    return label_ids, tokens
 
 
 class NERDataset(Dataset):
@@ -82,12 +88,13 @@ class NERDataset(Dataset):
                                                     max_length=self.max_length, return_tensors="pt",
                                                     truncation=True, padding='max_length',
                                                     is_split_into_words=True)
-        label_ids = align_label_example(text_tokenized,
+        label_ids, tokens = align_label_example(text_tokenized,
                                         labels, self.labels_to_id)
 
-        return {"labels ": torch.Tensor(label_ids).long(),
+        return {"labels": torch.Tensor(label_ids).long(),
                 "input_ids": text_tokenized['input_ids'].squeeze(),
-                "attention_mask": text_tokenized['attention_mask'].squeeze()}
+                "attention_mask": text_tokenized['attention_mask'].squeeze(),
+                "tokens":  torch.Tensor(tokens).long()}
 
     def __len__(self):
         return len(self.data["sentences"])

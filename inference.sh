@@ -1,13 +1,14 @@
 python run.py \
     --output_dir=./NER \
     --model_type=bert \
-    --model_name_or_path=microsoft/deberta-v3-base \
+    --model_name_or_path=./NER\
     --train_data_file=./data/eng.train \
     --eval_data_file=./data/eng.testa \
+    --test_data_file=./data/eng.testa \
     --epoch 5 \
     --max_length 256 \
     --batch_size 32 \
     --learning_rate 2e-5 \
     --seed 12456 \
-    --do_train \
+    --do_test \
     --device cuda:0
